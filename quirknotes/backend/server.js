@@ -38,6 +38,7 @@ const COLLECTIONS = {
   };
 
 
+
 // Get all notes available
 app.get("/getAllNotes", express.json(), async (req, res) => {
   try {
@@ -48,7 +49,7 @@ app.get("/getAllNotes", express.json(), async (req, res) => {
   } catch (error) {
     res.status(500).json({error: error.message})
   }
-})
+});
   
 // Post a note
 app.post("/postNote", express.json(), async (req, res) => {
@@ -78,6 +79,8 @@ app.post("/postNote", express.json(), async (req, res) => {
     }
   });
 
+
+
 // Delete a note
 app.delete("/deleteNote/:noteId", express.json(), async (req, res) => {
   try {
@@ -103,20 +106,26 @@ app.delete("/deleteNote/:noteId", express.json(), async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-})
+});
   
+
+
+
 // Patch a note
 app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
   try {
     // Basic param checking
     const noteId = req.params.noteId;
+   
     if (!ObjectId.isValid(noteId)) {
+      
       return res.status(400).json({ error: "Invalid note ID." });
     }
 
     // Basic body request check
     const { title, content } = req.body;
     if (!title && !content) {
+      
       return res
         .status(400)
         .json({ error: "Must have at least one of title or content." });
@@ -126,7 +135,7 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
     // Find note with given ID
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.updateOne({
-      username: decoded.username,
+      //username: decoded.username,
       _id: new ObjectId(noteId),
     }, {
       $set: {
@@ -144,4 +153,21 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
   } catch (error) {
     res.status(500).json({error: error.message})
   }
-})
+});
+
+
+app.delete("/deleteAllNotes", express.json(), async (req, res)=>{
+  try{
+    const collection = db.collection(COLLECTIONS.notes);
+    const data= await collection.deleteMany({});
+    if (data.deletedCount=== 0){
+      return res
+        .status(404)
+        .json({ error: "There are no notes to delete" });
+    }
+    
+    res.json({ response: `${data.deletedCount} deleted.`  });
+  } catch(error){
+    res.status(500).json({ error: error.message })
+  }
+});
